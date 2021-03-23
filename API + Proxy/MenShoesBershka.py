@@ -16,7 +16,7 @@ geolocator = Nominatim(user_agent="MenShoesBershka.py")
 location = geolocator.geocode(p_location)
 print((location.latitude, location.longitude))
 
-location_around_user = client.get("https://www.bershka.com/itxrest/2/bam/store/44009506/physical-store?latitude="+str(location.latitude)+"&longitude="+str(location.longitude)+"&countryCode=GB&max=10&appId=2&languageId=-1").json()
+location_around_user = client.get("https://www.bershka.com/itxrest/2/bam/store/44009506/physical-store?latitude=51.5073219&longitude=-0.1276474&countryCode=GB&max=10&appId=2&languageId=-1").json()
 
 store_ids = []
 
@@ -34,10 +34,24 @@ i = 0
 p_pn = []
 
 while i < len(products["products"]):
-    p_pn.append(products["products"][i]["bundleProductSummaries"][0]["detail"]["colors"][0]["sizes"][(p_size-5)]["partnumber"][0:13])
-    print(p_pn[i]+" ", i+1)
     try:
+        p_pn.append(products["products"][i]["bundleProductSummaries"][0]["detail"]["colors"][0]["sizes"][0]["partnumber"][0:13])
+        print(p_pn[i]+" ", i+1)
+        i=i+1
+    except IndexError:
+        break
+    
+
+list(dict.fromkeys(p_pn))
+i=0
+
+print("check")
+
+while i < len(p_pn):
+    try:
+        print("https://itxrest.inditex.com/LOMOServiciosRESTCommerce-ws/common/1/stock/campaign/V2021/product/part-number/"+p_pn[i]+"?physicalStoreId="+store_ids[0]+"&physicalStoreId="+store_ids[1]+"&physicalStoreId="+store_ids[2])
         p_stock = client.get("https://itxrest.inditex.com/LOMOServiciosRESTCommerce-ws/common/1/stock/campaign/V2021/product/part-number/"+p_pn[i]+"?physicalStoreId="+store_ids[0]+"&physicalStoreId="+store_ids[1]+"&physicalStoreId="+store_ids[2]).json()
+        print(p_stock)       
         #print(products["products"][i]["id"])
         counter = 0
         if "stocks" not in p_stock:
@@ -55,4 +69,5 @@ while i < len(products["products"]):
     finally:
         i=i+1
 
+print("the end")
 #print("Process finished --- %s seconds ---" % round((time.time() - start_time),2))
